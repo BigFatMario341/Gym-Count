@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Visit Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #00ff9d;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ff9d;
+        }
+        .log-button {
+            background: #00ff9d;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        .log-button:hover {
+            background: #00cc7a;
+            transform: scale(1.02);
+        }
+        .visits-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .visit-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .visit-date {
+            font-weight: 500;
+        }
+        .visit-types {
+            display: flex;
+            gap: 8px;
+        }
+        .type-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .cardio { background: #ff6b6b; color: white; }
+        .weights { background: #4ecdc4; color: white; }
+        .both { background: #45b7d1; color: white; }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #00ff9d;
+        }
+        .warning {
+            background: #ff9800;
+            color: #000;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .clear-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️ Gym Visit Tracker</h1>
+        <p class="subtitle">Track your workouts • Stay consistent</p>
+
+        <div class="warning">
+            ⚠️ Data is saved only while this page is open.<br>
+            Refreshing or closing the tab will clear your visits.
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div>Total Visits</div>
+                <div id="total-visits" class="stat-number">0</div>
+            </div>
+            <div class="stat-card">
+                <div>700 ÷ Visits</div>
+                <div id="division-result" class="stat-number">—</div>
+            </div>
+            <div class="stat-card">
+                <div>Last Visit</div>
+                <div id="last-visit" class="stat-number" style="font-size: 1.3rem;">—</div>
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" id="cardio" checked> Cardio
+            </label>
+            <label>
+                <input type="checkbox" id="weights" checked> Weights
+            </label>
+            <label>
+                <input type="checkbox" id="both"> Both (Cardio + Weights)
+            </label>
+        </div>
+
+        <button onclick="logVisit()" class="log-button">
+            ✅ LOG TODAY'S GYM VISIT
+        </button>
+
+        <h2 style="margin-bottom: 15px;">Visit History</h2>
+        <div id="visits-list" class="visits-list"></div>
+
+        <button onclick="clearAllData()" class="clear-button">
+            🗑️ Clear All Data
+        </button>
+
+        <div class="footer">
+            Tip: For permanent saving, open this file from a local web server or use the version with localStorage in a normal browser tab.
+        </div>
+    </div>
+
+    <script>
+        let visits = [];
+
+        function getTodayDate() {
+            const today = new Date();
+            return today.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function getShortDate() {
+            const today = new Date();
+            return today.toISOString().split('T')[0]; // YYYY-MM-DD
+        }
+
+        function logVisit() {
+            const todayShort = getShortDate();
+
+            // Prevent duplicate entries for the same day (unless user confirms)
+            const alreadyLogged = visits.some(visit => visit.date === todayShort);
+            if (alreadyLogged) {
+                if (!confirm("You've already logged a visit for today.\nLog another one anyway?")) {
+                    return;
+                }
+            }
+
+            const cardio = document.getElementById('cardio').checked;
+            const weights = document.getElementById('weights').checked;
+            const both = document.getElementById('both').checked;
+
+            let type = 'Gym Visit';
+            let typeClass = 'both';
+
+            if (both || (cardio && weights)) {
+                type = 'Both';
+                typeClass = 'both';
+            } else if (cardio) {
+                type = 'Cardio';
+                typeClass = 'cardio';
+            } else if (weights) {
+                type = 'Weights';
+                typeClass = 'weights';
+            }
+
+            const visit = {
+                date: todayShort,
+                displayDate: getTodayDate(),
+                type: type,
+                typeClass: typeClass,
+                timestamp: new Date().toISOString()
+            };
+
+            visits.unshift(visit); // Add to top
+            updateUI();
+        }
+
+        function updateUI() {
+            const totalVisitsEl = document.getElementById('total-visits');
+            const divisionEl = document.getElementById('division-result');
+            const lastVisitEl = document.getElementById('last-visit');
+            const visitsListEl = document.getElementById('visits-list');
+
+            const total = visits.length;
+            totalVisitsEl.textContent = total;
+
+            // 700 ÷ visits
+            if (total > 0) {
+                const result = (700 / total).toFixed(2);
+                divisionEl.textContent = result;
+            } else {
+                divisionEl.textContent = '—';
+            }
+
+            // Last visit
+            if (total > 0) {
+                lastVisitEl.textContent = visits[0].displayDate;
+            } else {
+                lastVisitEl.textContent = '—';
+            }
+
+            // Render history
+            visitsListEl.innerHTML = '';
+
+            if (total === 0) {
+                const empty = document.createElement('div');
+                empty.style.textAlign = 'center';
+                empty.style.padding = '50px 20px';
+                empty.style.color = '#777';
+                empty.innerHTML = 'No visits logged yet.<br><br>Press the big button above to log your first visit!';
+                visitsListEl.appendChild(empty);
+                return;
+            }
+
+            visits.forEach(visit => {
+                const item = document.createElement('div');
+                item.className = 'visit-item';
+                item.innerHTML = `
+                    <div class="visit-date">${visit.displayDate}</div>
+                    <div class="visit-types">
+                        <span class="type-tag ${visit.typeClass}">${visit.type}</span>
+                    </div>
+                `;
+                visitsListEl.appendChild(item);
+            });
+        }
+
+        function clearAllData() {
+            if (confirm("Clear all visit data?")) {
+                visits = [];
+                updateUI();
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            updateUI();
+        };
+    </script>
+</body>
+</html>
