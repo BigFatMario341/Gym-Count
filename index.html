@@ -101,6 +101,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+        }
+        .visit-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .type-tag {
             padding: 5px 14px;
@@ -111,6 +118,19 @@
         .cardio { background: #ff6b6b; }
         .weights { background: #4ecdc4; }
         .both { background: #45b7d1; }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .edit-btn:hover {
+            background: #2980b9;
+        }
 
         .save-row {
             display: flex;
@@ -133,6 +153,36 @@
             font-size: 0.9rem;
             margin: 10px 0;
             color: #00ff9d;
+        }
+
+        /* Modal for editing */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #16213e;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 420px;
+        }
+        .modal h3 {
+            margin-top: 0;
+            color: #00ff9d;
+        }
+        .modal label {
+            display: block;
+            margin: 15px 0 8px;
+        }
+        .modal button {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -169,19 +219,39 @@
         </button>
 
         <div class="save-row">
-            <button onclick="exportData()" class="btn-export">📤 Export Data (JSON)</button>
+            <button onclick="exportData()" class="btn-export">📤 Export Data</button>
             <button onclick="importData()" class="btn-export">📥 Import Data</button>
-            <button onclick="clearAllData()" class="btn-clear">🗑️ Clear All Data</button>
+            <button onclick="clearAllData()" class="btn-clear">🗑️ Clear All</button>
         </div>
 
-        <h2>Visit History</h2>
+        <h2>Visit History (Click edit to change)</h2>
         <div id="visits-list" class="visits-list"></div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Visit</h3>
+            <p id="edit-date" style="color:#aaa; margin-bottom:20px;"></p>
+            
+            <label><strong>Workout Type:</strong></label>
+            <select id="edit-type" style="width:100%; padding:10px; border-radius:8px; background:#1e2a4a; color:white; border:none;">
+                <option value="Cardio">Cardio</option>
+                <option value="Weights">Weights</option>
+                <option value="Both">Both (Cardio + Weights)</option>
+            </select>
+
+            <div style="margin-top:20px; text-align:center;">
+                <button onclick="saveEdit()" style="background:#00ff9d; color:black; padding:12px 30px; border:none; border-radius:8px; font-weight:bold; margin-right:10px;">Save Changes</button>
+                <button onclick="closeModal()" style="background:#555; color:white; padding:12px 30px; border:none; border-radius:8px;">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script>
         let visits = [];
+        let currentEditIndex = -1;
 
-        // Load from localStorage on start
         function loadVisits() {
             const saved = localStorage.getItem('gymVisits');
             if (saved) {
@@ -203,21 +273,15 @@
 
         function getDisplayDate() {
             return new Date().toLocaleDateString('en-US', {
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric'
+                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
             });
         }
 
         function logVisit() {
             const today = getTodayShort();
 
-            // Optional: warn if already logged today
             if (visits.some(v => v.date === today)) {
-                if (!confirm("You've already logged a visit for today.\nLog another one anyway?")) {
-                    return;
-                }
+                if (!confirm("You've already logged today.\nLog another visit anyway?")) return;
             }
 
             const cardio = document.getElementById('cardio').checked;
@@ -252,10 +316,8 @@
 
         function updateUI() {
             document.getElementById('total-visits').textContent = visits.length;
-
-            const divEl = document.getElementById('division-result');
-            divEl.textContent = visits.length > 0 ? (700 / visits.length).toFixed(2) : '—';
-
+            document.getElementById('division-result').textContent = 
+                visits.length > 0 ? (700 / visits.length).toFixed(2) : '—';
             document.getElementById('last-visit').textContent = 
                 visits.length > 0 ? visits[0].displayDate : '—';
 
@@ -264,20 +326,60 @@
 
             if (visits.length === 0) {
                 list.innerHTML = `<p style="text-align:center; color:#777; padding:60px 20px;">
-                    No visits logged yet.<br>Press the button above to start!
+                    No visits logged yet.<br>Press the button above!
                 </p>`;
                 return;
             }
 
-            visits.forEach(v => {
+            visits.forEach((v, index) => {
                 const div = document.createElement('div');
                 div.className = 'visit-item';
                 div.innerHTML = `
-                    <div>${v.displayDate}</div>
-                    <div><span class="type-tag ${v.typeClass}">${v.type}</span></div>
+                    <div class="visit-info">
+                        <div>${v.displayDate}</div>
+                        <div><span class="type-tag ${v.typeClass}">${v.type}</span></div>
+                    </div>
+                    <button class="edit-btn" onclick="editVisit(${index})">Edit</button>
                 `;
                 list.appendChild(div);
             });
+        }
+
+        // ==================== EDIT FUNCTIONALITY ====================
+        function editVisit(index) {
+            currentEditIndex = index;
+            const visit = visits[index];
+            
+            document.getElementById('edit-date').textContent = visit.displayDate;
+            document.getElementById('edit-type').value = visit.type;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function saveEdit() {
+            if (currentEditIndex === -1) return;
+
+            const newType = document.getElementById('edit-type').value;
+            const visit = visits[currentEditIndex];
+
+            visit.type = newType;
+            
+            // Update typeClass for styling
+            if (newType === "Both") {
+                visit.typeClass = "both";
+            } else if (newType === "Cardio") {
+                visit.typeClass = "cardio";
+            } else if (newType === "Weights") {
+                visit.typeClass = "weights";
+            }
+
+            saveVisits();
+            closeModal();
+            updateUI();
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditIndex = -1;
         }
 
         function clearAllData() {
@@ -290,14 +392,14 @@
 
         function exportData() {
             if (visits.length === 0) {
-                alert("No data to export yet!");
+                alert("No data to export!");
                 return;
             }
             const dataStr = JSON.stringify(visits, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const link = document.createElement('a');
             link.href = dataUri;
-            link.download = `gym-visits-backup-${new Date().toISOString().slice(0,10)}.json`;
+            link.download = `gym-visits-${new Date().toISOString().slice(0,10)}.json`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -318,12 +420,10 @@
                             visits = imported;
                             saveVisits();
                             updateUI();
-                            alert(`✅ Imported ${visits.length} visits successfully!`);
-                        } else {
-                            alert("Invalid backup file.");
+                            alert(`✅ Imported ${visits.length} visits!`);
                         }
                     } catch (err) {
-                        alert("Error reading the file. Please select a valid gym-visits JSON backup.");
+                        alert("Error reading file.");
                     }
                 };
                 reader.readAsText(file);
@@ -331,7 +431,15 @@
             input.click();
         }
 
-        // Initialize the app
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Initialize
         window.onload = function() {
             loadVisits();
             updateUI();
