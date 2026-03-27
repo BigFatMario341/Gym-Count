@@ -14,23 +14,24 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 800px;
+            max-width: 820px;
             margin: 0 auto;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         }
-        h1 {
-            text-align: center;
-            color: #00ff9d;
-            margin-bottom: 10px;
+        h1 { 
+            text-align: center; 
+            color: #00ff9d; 
+            margin-bottom: 8px; 
         }
-        .subtitle {
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 30px;
+        .subtitle { 
+            text-align: center; 
+            color: #aaa; 
+            margin-bottom: 25px; 
         }
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -38,117 +39,109 @@
             margin-bottom: 30px;
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             padding: 20px;
             border-radius: 15px;
             text-align: center;
             border: 1px solid rgba(0, 255, 157, 0.3);
         }
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 2.6rem;
             font-weight: bold;
             color: #00ff9d;
         }
+
         .log-button {
             background: #00ff9d;
             color: #000;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 16px 32px;
+            font-size: 1.25rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 25px;
-            transition: all 0.3s;
+            margin: 20px 0;
+            transition: 0.3s;
         }
-        .log-button:hover {
-            background: #00cc7a;
-            transform: scale(1.02);
+        .log-button:hover { 
+            background: #00cc7a; 
+            transform: scale(1.03); 
         }
-        .visits-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-        .visit-item {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .visit-date {
-            font-weight: 500;
-        }
-        .visit-types {
-            display: flex;
-            gap: 8px;
-        }
-        .type-tag {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        .cardio { background: #ff6b6b; color: white; }
-        .weights { background: #4ecdc4; color: white; }
-        .both { background: #45b7d1; color: white; }
-        
+
         .checkbox-group {
             display: flex;
             gap: 20px;
-            margin-bottom: 20px;
+            margin: 20px 0;
             flex-wrap: wrap;
         }
         label {
             display: flex;
             align-items: center;
             gap: 8px;
-            cursor: pointer;
             font-size: 1.1rem;
+            cursor: pointer;
         }
         input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             accent-color: #00ff9d;
         }
-        .warning {
-            background: #ff9800;
-            color: #000;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-            text-align: center;
+
+        .visits-list {
+            max-height: 420px;
+            overflow-y: auto;
+            margin: 20px 0;
         }
-        .clear-button {
-            background: #ff4757;
-            color: white;
+        .visit-item {
+            background: rgba(255,255,255,0.08);
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .type-tag {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .cardio { background: #ff6b6b; }
+        .weights { background: #4ecdc4; }
+        .both { background: #45b7d1; }
+
+        .save-row {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 18px;
             border: none;
-            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
-        .footer {
+        .btn-clear { background: #d63031; color: white; }
+        .btn-export { background: #00b894; color: white; }
+
+        .status {
             text-align: center;
-            margin-top: 30px;
-            color: #666;
             font-size: 0.9rem;
+            margin: 10px 0;
+            color: #00ff9d;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏋️ Gym Visit Tracker</h1>
-        <p class="subtitle">Track your workouts • Stay consistent</p>
+        <p class="subtitle">Log your visits • 700 ÷ visits progress</p>
 
-        <div class="warning">
-            ⚠️ Data is saved only while this page is open.<br>
-            Refreshing or closing the tab will clear your visits.
-        </div>
+        <div class="status" id="status">💾 Data saved automatically with localStorage</div>
 
         <div class="stats">
             <div class="stat-card">
@@ -161,62 +154,67 @@
             </div>
             <div class="stat-card">
                 <div>Last Visit</div>
-                <div id="last-visit" class="stat-number" style="font-size: 1.3rem;">—</div>
+                <div id="last-visit" class="stat-number" style="font-size:1.35rem;">—</div>
             </div>
         </div>
 
         <div class="checkbox-group">
-            <label>
-                <input type="checkbox" id="cardio" checked> Cardio
-            </label>
-            <label>
-                <input type="checkbox" id="weights" checked> Weights
-            </label>
-            <label>
-                <input type="checkbox" id="both"> Both (Cardio + Weights)
-            </label>
+            <label><input type="checkbox" id="cardio" checked> Cardio</label>
+            <label><input type="checkbox" id="weights" checked> Weights</label>
+            <label><input type="checkbox" id="both"> Both (Cardio + Weights)</label>
         </div>
 
         <button onclick="logVisit()" class="log-button">
             ✅ LOG TODAY'S GYM VISIT
         </button>
 
-        <h2 style="margin-bottom: 15px;">Visit History</h2>
-        <div id="visits-list" class="visits-list"></div>
-
-        <button onclick="clearAllData()" class="clear-button">
-            🗑️ Clear All Data
-        </button>
-
-        <div class="footer">
-            Tip: For permanent saving, open this file from a local web server or use the version with localStorage in a normal browser tab.
+        <div class="save-row">
+            <button onclick="exportData()" class="btn-export">📤 Export Data (JSON)</button>
+            <button onclick="importData()" class="btn-export">📥 Import Data</button>
+            <button onclick="clearAllData()" class="btn-clear">🗑️ Clear All Data</button>
         </div>
+
+        <h2>Visit History</h2>
+        <div id="visits-list" class="visits-list"></div>
     </div>
 
     <script>
         let visits = [];
 
-        function getTodayDate() {
-            const today = new Date();
-            return today.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
+        // Load from localStorage on start
+        function loadVisits() {
+            const saved = localStorage.getItem('gymVisits');
+            if (saved) {
+                try {
+                    visits = JSON.parse(saved);
+                } catch (e) {
+                    visits = [];
+                }
+            }
+        }
+
+        function saveVisits() {
+            localStorage.setItem('gymVisits', JSON.stringify(visits));
+        }
+
+        function getTodayShort() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function getDisplayDate() {
+            return new Date().toLocaleDateString('en-US', {
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric', 
                 year: 'numeric'
             });
         }
 
-        function getShortDate() {
-            const today = new Date();
-            return today.toISOString().split('T')[0]; // YYYY-MM-DD
-        }
-
         function logVisit() {
-            const todayShort = getShortDate();
+            const today = getTodayShort();
 
-            // Prevent duplicate entries for the same day (unless user confirms)
-            const alreadyLogged = visits.some(visit => visit.date === todayShort);
-            if (alreadyLogged) {
+            // Optional: warn if already logged today
+            if (visits.some(v => v.date === today)) {
                 if (!confirm("You've already logged a visit for today.\nLog another one anyway?")) {
                     return;
                 }
@@ -226,91 +224,116 @@
             const weights = document.getElementById('weights').checked;
             const both = document.getElementById('both').checked;
 
-            let type = 'Gym Visit';
-            let typeClass = 'both';
+            let type = "Gym Visit";
+            let typeClass = "both";
 
             if (both || (cardio && weights)) {
-                type = 'Both';
-                typeClass = 'both';
+                type = "Both";
+                typeClass = "both";
             } else if (cardio) {
-                type = 'Cardio';
-                typeClass = 'cardio';
+                type = "Cardio";
+                typeClass = "cardio";
             } else if (weights) {
-                type = 'Weights';
-                typeClass = 'weights';
+                type = "Weights";
+                typeClass = "weights";
             }
 
-            const visit = {
-                date: todayShort,
-                displayDate: getTodayDate(),
+            visits.unshift({
+                date: today,
+                displayDate: getDisplayDate(),
                 type: type,
                 typeClass: typeClass,
                 timestamp: new Date().toISOString()
-            };
+            });
 
-            visits.unshift(visit); // Add to top
+            saveVisits();
             updateUI();
         }
 
         function updateUI() {
-            const totalVisitsEl = document.getElementById('total-visits');
-            const divisionEl = document.getElementById('division-result');
-            const lastVisitEl = document.getElementById('last-visit');
-            const visitsListEl = document.getElementById('visits-list');
+            document.getElementById('total-visits').textContent = visits.length;
 
-            const total = visits.length;
-            totalVisitsEl.textContent = total;
+            const divEl = document.getElementById('division-result');
+            divEl.textContent = visits.length > 0 ? (700 / visits.length).toFixed(2) : '—';
 
-            // 700 ÷ visits
-            if (total > 0) {
-                const result = (700 / total).toFixed(2);
-                divisionEl.textContent = result;
-            } else {
-                divisionEl.textContent = '—';
-            }
+            document.getElementById('last-visit').textContent = 
+                visits.length > 0 ? visits[0].displayDate : '—';
 
-            // Last visit
-            if (total > 0) {
-                lastVisitEl.textContent = visits[0].displayDate;
-            } else {
-                lastVisitEl.textContent = '—';
-            }
+            const list = document.getElementById('visits-list');
+            list.innerHTML = '';
 
-            // Render history
-            visitsListEl.innerHTML = '';
-
-            if (total === 0) {
-                const empty = document.createElement('div');
-                empty.style.textAlign = 'center';
-                empty.style.padding = '50px 20px';
-                empty.style.color = '#777';
-                empty.innerHTML = 'No visits logged yet.<br><br>Press the big button above to log your first visit!';
-                visitsListEl.appendChild(empty);
+            if (visits.length === 0) {
+                list.innerHTML = `<p style="text-align:center; color:#777; padding:60px 20px;">
+                    No visits logged yet.<br>Press the button above to start!
+                </p>`;
                 return;
             }
 
-            visits.forEach(visit => {
-                const item = document.createElement('div');
-                item.className = 'visit-item';
-                item.innerHTML = `
-                    <div class="visit-date">${visit.displayDate}</div>
-                    <div class="visit-types">
-                        <span class="type-tag ${visit.typeClass}">${visit.type}</span>
-                    </div>
+            visits.forEach(v => {
+                const div = document.createElement('div');
+                div.className = 'visit-item';
+                div.innerHTML = `
+                    <div>${v.displayDate}</div>
+                    <div><span class="type-tag ${v.typeClass}">${v.type}</span></div>
                 `;
-                visitsListEl.appendChild(item);
+                list.appendChild(div);
             });
         }
 
         function clearAllData() {
-            if (confirm("Clear all visit data?")) {
+            if (confirm("Delete ALL gym visit data? This cannot be undone.")) {
                 visits = [];
+                localStorage.removeItem('gymVisits');
                 updateUI();
             }
         }
 
-        // Initialize
+        function exportData() {
+            if (visits.length === 0) {
+                alert("No data to export yet!");
+                return;
+            }
+            const dataStr = JSON.stringify(visits, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const link = document.createElement('a');
+            link.href = dataUri;
+            link.download = `gym-visits-backup-${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        if (Array.isArray(imported)) {
+                            visits = imported;
+                            saveVisits();
+                            updateUI();
+                            alert(`✅ Imported ${visits.length} visits successfully!`);
+                        } else {
+                            alert("Invalid backup file.");
+                        }
+                    } catch (err) {
+                        alert("Error reading the file. Please select a valid gym-visits JSON backup.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Initialize the app
         window.onload = function() {
+            loadVisits();
             updateUI();
         };
     </script>
